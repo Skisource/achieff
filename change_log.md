@@ -1,8 +1,17 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. The container environment is in place. Board pages have not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 1 shell is in place. The domain model has not started.
 
 ## Unreleased
+
+### 2026-10-10 — Phase 1 skeleton
+
+Bulma shell with four empty pages on the existing container. Tooling, health, Docker, and the `/data` volume were already in place.
+
+- Vendored Bulma 1.0.4 (`static/css/bulma.min.css`, MIT) so the ship UI does not depend on a CDN.
+- `/`, `/home`, `/leaderboard`, and `/admin` share a dark navbar and an empty-state message. The navbar burger is vanilla JavaScript.
+- Admin is a placeholder and is not gated. Sign-in and rejection of non-admins stay in Phases 3 and 4.
+- `GET /health` is unchanged.
 
 ### 2026-10-10 — Git and container environment
 
@@ -186,11 +195,15 @@ Each phase is shippable on its own. A later phase does not start by rewriting th
 
 Write this document. No application code.
 
+**Status:** done.
+
 **Done when:** the plan is in `change_log.md` and the scope of v1 is the three boards, admin, and hex-key login.
 
 ### Phase 1 — Skeleton
 
 Tooling, Quart app, Bulma shell, nav for Onboard / At home / Leaderboard / Admin, health route, empty states, Dockerfile that builds, compose file with a `/data` volume, dev port ≥ 10000.
+
+**Status:** done.
 
 **Done when:** `docker compose up` serves the four empty pages and `/health` returns ok.
 

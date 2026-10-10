@@ -1,13 +1,9 @@
 from pathlib import Path
 
-from pytest import MonkeyPatch
-
-from achieff import app as app_module
+from quart import Quart
 
 
-async def test_health(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setenv("ACHIEFF_DATA_DIR", str(tmp_path / "ship-data"))
-    application = app_module.create_app()
+async def test_health(application: Quart, tmp_path: Path) -> None:
     client = application.test_client()
 
     response = await client.get("/health")

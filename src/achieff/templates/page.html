@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ page.label }} · Achieff{% endblock %}
+{% block content %}
+  <h1 class="title">{{ page.label }}</h1>
+  <article class="message">
+    <div class="message-body">
+      <p class="has-text-weight-semibold">{{ page.empty_title }}</p>
+      <p>{{ page.empty_body }}</p>
+    </div>
+  </article>
+{% endblock %}
