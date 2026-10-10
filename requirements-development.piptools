@@ -1,0 +1,6 @@
+# Development dependencies. Compile after requirements.txt:
+#   uv pip compile requirements-development.piptools -o requirements-development.txt --python-version 3.14 --universal --generate-hashes
+-r requirements.txt
+pytest
+pytest-asyncio
+ruff

@@ -1,0 +1,29 @@
+name: achieff
+
+services:
+  achieff:
+    build:
+      context: .
+    image: achieff:local
+    ports:
+      - "10000:8080"
+    environment:
+      ACHIEFF_DATA_DIR: /data
+    volumes:
+      - achieff-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  achieff-data:

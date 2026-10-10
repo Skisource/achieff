@@ -1,0 +1,1 @@
+"""Shipboard crew achievement board."""

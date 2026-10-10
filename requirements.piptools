@@ -1,0 +1,4 @@
+# Runtime dependencies. Compile with:
+#   uv pip compile requirements.piptools -o requirements.txt --python-version 3.14 --universal --generate-hashes
+hypercorn
+quart
