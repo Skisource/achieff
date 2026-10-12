@@ -5,6 +5,7 @@ description = "Shipboard crew achievement board"
 requires-python = ">=3.14"
 dependencies = [
     "aiosqlite",
+    "argon2-cffi",
     "hypercorn",
     "quart",
 ]

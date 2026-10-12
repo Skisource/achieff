@@ -4,7 +4,7 @@ from typing import Optional
 
 from aiosqlite import Connection
 
-from achieff import crew
+from achieff import badges, crew
 
 
 class AwardError(ValueError):
@@ -21,8 +21,11 @@ async def pin(
 ) -> int:
     if await crew.get(connection, crew_id) is None:
         raise AwardError("That alias does not exist.")
-    if not await _badge_exists(connection, badge_id):
+    badge = await badges.get(connection, badge_id)
+    if badge is None:
         raise AwardError("That badge does not exist.")
+    if badge["closed_at"] is not None:
+        raise AwardError("That badge is closed to new pins.")
     if awarded_by is not None and await crew.get(connection, awarded_by) is None:
         raise AwardError("The awarding alias does not exist.")
 
@@ -42,17 +45,28 @@ async def pin(
     return int(cursor.lastrowid)
 
 
+async def list_awards(connection: Connection) -> list:
+    async with connection.execute(
+        """
+        SELECT
+            award.id AS id,
+            award.crew_id AS crew_id,
+            award.badge_id AS badge_id,
+            crew.alias AS alias,
+            badge.title AS title,
+            badge.polarity AS polarity
+        FROM award
+        JOIN crew ON crew.id = award.crew_id
+        JOIN badge ON badge.id = award.badge_id
+        ORDER BY crew.alias_normalized, badge.sort_order, badge.title
+        """
+    ) as cursor:
+        return await cursor.fetchall()
+
+
 async def unpin(connection: Connection, crew_id: int, badge_id: int) -> None:
     await connection.execute(
         "DELETE FROM award WHERE crew_id = ? AND badge_id = ?",
         (crew_id, badge_id),
     )
     await connection.commit()
-
-
-async def _badge_exists(connection: Connection, badge_id: int) -> bool:
-    async with connection.execute(
-        "SELECT id FROM badge WHERE id = ?",
-        (badge_id,),
-    ) as cursor:
-        return await cursor.fetchone() is not None

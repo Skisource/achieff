@@ -3,7 +3,7 @@ from pathlib import Path
 
 from quart import Quart, Response, jsonify
 
-from achieff import db, pages
+from achieff import admin, auth, db, pages
 
 
 def create_app() -> Quart:
@@ -13,11 +13,19 @@ def create_app() -> Quart:
         template_folder=str(root / "templates"),
         static_folder=str(root / "static"),
     )
-    asyncio.run(db.migrate())
+    app.config["SECRET_KEY"] = auth.secret_key()
+    asyncio.run(_startup())
     pages.register(app)
+    auth.register(app)
+    admin.register(app)
 
     @app.get("/health")
     async def health() -> Response:
         return jsonify(status="ok")
 
     return app
+
+
+async def _startup() -> None:
+    await db.migrate()
+    await auth.bootstrap_admin()

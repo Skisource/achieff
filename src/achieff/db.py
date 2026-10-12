@@ -7,9 +7,14 @@ from aiosqlite import Connection
 from achieff import badges, gdpr
 
 DATABASE_NAME = "achieff.sqlite3"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
-_SCHEMA = """
+_MIGRATION_1 = """
+CREATE TABLE IF NOT EXISTS schema_version (
+    version INTEGER NOT NULL
+);
+
+
 CREATE TABLE crew (
     id INTEGER PRIMARY KEY,
     alias TEXT NOT NULL,
@@ -49,6 +54,13 @@ CREATE TABLE session (
 DELETE FROM schema_version;
 INSERT INTO schema_version (version) VALUES (1);
 """
+
+_MIGRATION_2 = """
+ALTER TABLE badge ADD COLUMN closed_at TEXT;
+UPDATE schema_version SET version = 2;
+"""
+
+MIGRATIONS = (_MIGRATION_1, _MIGRATION_2)
 
 
 def data_dir() -> Path:
@@ -109,20 +121,27 @@ async def assert_schema_is_allowed(connection: Connection) -> None:
 
 
 async def _ensure_schema(connection: Connection) -> None:
-    await connection.execute(
-        "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)"
-    )
-    version = await _schema_version(connection)
-    if version > SCHEMA_VERSION:
-        raise SchemaVersionError(
-            f"Database version {version} is newer than {SCHEMA_VERSION}."
-        )
-    if version < SCHEMA_VERSION:
-        await connection.executescript(_SCHEMA)
+    while True:
+        version = await _schema_version(connection)
+        if version == SCHEMA_VERSION:
+            break
+        if version > SCHEMA_VERSION:
+            raise SchemaVersionError(
+                f"Database version {version} is newer than {SCHEMA_VERSION}."
+            )
+        await connection.executescript(MIGRATIONS[version])
     await assert_schema_is_allowed(connection)
 
 
 async def _schema_version(connection: Connection) -> int:
+    async with connection.execute(
+        """
+        SELECT name FROM sqlite_master
+        WHERE type = 'table' AND name = 'schema_version'
+        """
+    ) as cursor:
+        if await cursor.fetchone() is None:
+            return 0
     async with connection.execute("SELECT version FROM schema_version") as cursor:
         row = await cursor.fetchone()
     if row is None:

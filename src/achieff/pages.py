@@ -44,17 +44,16 @@ PAGES = (
         key="admin",
         label="Admin",
         path="/admin",
-        empty_title="Nothing to manage yet.",
-        empty_body=(
-            "Crew, keys, badges, and active or retired status will be edited here. "
-            "This page stays open until sign-in lands."
-        ),
+        empty_title="Sign in to manage the roster.",
+        empty_body="Crew, keys, badges, and active or retired status are edited here.",
     ),
 )
 
 
 def register(app: Quart) -> None:
     for page in PAGES:
+        if page.key == "admin":
+            continue
         _bind(app, page)
 
 

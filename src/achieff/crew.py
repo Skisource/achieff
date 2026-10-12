@@ -120,6 +120,30 @@ async def set_status(connection: Connection, crew_id: int, status: str) -> None:
     await connection.commit()
 
 
+async def list_crew(connection: Connection) -> list:
+    async with connection.execute(
+        "SELECT * FROM crew ORDER BY alias_normalized"
+    ) as cursor:
+        return await cursor.fetchall()
+
+
+async def any_admin(connection: Connection) -> bool:
+    async with connection.execute(
+        "SELECT 1 FROM crew WHERE role = 'admin' LIMIT 1"
+    ) as cursor:
+        return await cursor.fetchone() is not None
+
+
+async def set_key_hash(connection: Connection, crew_id: int, key_hash: str) -> None:
+    if await get(connection, crew_id) is None:
+        raise CrewNotFound("That alias does not exist.")
+    await connection.execute(
+        "UPDATE crew SET key_hash = ? WHERE id = ?",
+        (key_hash, crew_id),
+    )
+    await connection.commit()
+
+
 async def delete(connection: Connection, crew_id: int) -> None:
     if await get(connection, crew_id) is None:
         raise CrewNotFound("That alias does not exist.")

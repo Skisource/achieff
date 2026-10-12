@@ -1,6 +1,10 @@
 from datetime import UTC, datetime
+from sqlite3 import IntegrityError
 
 from aiosqlite import Connection
+
+_TITLE_MAX_LENGTH = 60
+_POLARITIES = {"goody", "baddy"}
 
 EXAMPLES = (
     ("drilled-through-cable", "Drilled through cable", "baddy", 1),
@@ -27,6 +31,108 @@ async def list_badges(connection: Connection) -> list:
         "SELECT * FROM badge ORDER BY sort_order, slug"
     ) as cursor:
         return await cursor.fetchall()
+
+
+async def get(connection: Connection, badge_id: int):
+    async with connection.execute(
+        "SELECT * FROM badge WHERE id = ?", (badge_id,)
+    ) as cursor:
+        return await cursor.fetchone()
+
+
+async def list_open(connection: Connection) -> list:
+    async with connection.execute(
+        """
+        SELECT * FROM badge
+        WHERE closed_at IS NULL
+        ORDER BY sort_order, slug
+        """
+    ) as cursor:
+        return await cursor.fetchall()
+
+
+async def create(connection: Connection, title: str, polarity: str) -> int:
+    cleaned = clean_title(title)
+    if polarity not in _POLARITIES:
+        raise BadgePolarityError("Polarity must be goody or baddy.")
+    slug = slug_for(cleaned)
+    if not slug:
+        raise BadgeTitleError("Title needs a letter or number.")
+    sort_order = await _next_sort_order(connection)
+    try:
+        cursor = await connection.execute(
+            """
+            INSERT INTO badge (slug, title, polarity, sort_order, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (slug, cleaned, polarity, sort_order, datetime.now(UTC).isoformat()),
+        )
+        await connection.commit()
+    except IntegrityError as error:
+        await connection.rollback()
+        raise BadgeTitleError("That badge already exists.") from error
+    return int(cursor.lastrowid)
+
+
+async def rename(connection: Connection, badge_id: int, title: str) -> None:
+    cleaned = clean_title(title)
+    if await get(connection, badge_id) is None:
+        raise BadgeNotFound("That badge does not exist.")
+    await connection.execute(
+        "UPDATE badge SET title = ? WHERE id = ?",
+        (cleaned, badge_id),
+    )
+    await connection.commit()
+
+
+async def close(connection: Connection, badge_id: int) -> None:
+    if await get(connection, badge_id) is None:
+        raise BadgeNotFound("That badge does not exist.")
+    await connection.execute(
+        """
+        UPDATE badge
+        SET closed_at = ?
+        WHERE id = ? AND closed_at IS NULL
+        """,
+        (datetime.now(UTC).isoformat(), badge_id),
+    )
+    await connection.commit()
+
+
+def clean_title(title: str) -> str:
+    compact = " ".join(title.split())
+    if not compact:
+        raise BadgeTitleError("Title is empty.")
+    if len(compact) > _TITLE_MAX_LENGTH:
+        raise BadgeTitleError("Title is too long.")
+    return compact
+
+
+def slug_for(title: str) -> str:
+    slug = "".join(char.lower() if char.isalnum() else "-" for char in title)
+    while "--" in slug:
+        slug = slug.replace("--", "-")
+    return slug.strip("-")
+
+
+async def _next_sort_order(connection: Connection) -> int:
+    async with connection.execute(
+        "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM badge"
+    ) as cursor:
+        row = await cursor.fetchone()
+    return int(row["next_order"])
+
+
+class BadgeTitleError(ValueError):
+    pass
+
+
+class BadgePolarityError(ValueError):
+    pass
+
+
+class BadgeNotFound(LookupError):
+    pass
 
 
 async def find_by_slug(connection: Connection, slug: str):

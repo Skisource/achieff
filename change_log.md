@@ -1,8 +1,18 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 2 domain is in place. Admin and keys have not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 3 admin is in place. Crew login polish has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 3 admin and keys
+
+Admin can sign in with an alias and a hex key, then run the roster from `/admin`. The public boards stay open.
+
+- If the database has no admin, `ACHIEFF_BOOTSTRAP_ALIAS` creates one and prints the key once in the process log. The key is stored only as an argon2 hash.
+- Adding or reissuing a key shows the new key once on the admin page. The old key stops working at reissue.
+- Admin can add an alias, set active or retired, delete an alias, add and rename badges, close a badge to new pins, and pin or unpin awards. Forms carry a CSRF token. A crew session gets 403 on `/admin`.
+- Deleting an alias removes it from queries. The signed-in admin and the last admin cannot be deleted.
+- Login rate limiting stays in Phase 4.
 
 ### 2026-10-12 — Phase 2 domain
 
@@ -235,6 +245,8 @@ SQLite schema, migrations applied on startup, repository functions for crew, bad
 ### Phase 3 — Admin and keys
 
 Bootstrap admin. Crew add / set status / delete. Key issue and reissue, plaintext shown once. Badge create and retire (close a badge to new pins). Award pin and unpin. CSRF on forms. Admin routes reject a non-admin session.
+
+**Status:** done.
 
 **Done when:** a fresh database can be populated entirely from the admin UI, and a deleted alias disappears from queries.
 

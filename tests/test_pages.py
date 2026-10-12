@@ -3,8 +3,10 @@ from quart import Quart
 
 from achieff import pages as pages_module
 
+_PUBLIC_PAGES = [page for page in pages_module.PAGES if page.key != "admin"]
 
-@pytest.mark.parametrize("page", pages_module.PAGES, ids=lambda page: page.key)
+
+@pytest.mark.parametrize("page", _PUBLIC_PAGES, ids=lambda page: page.key)
 async def test_empty_page(application: Quart, page: pages_module.Page) -> None:
     client = application.test_client()
 
