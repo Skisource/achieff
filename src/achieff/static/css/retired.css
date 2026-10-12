@@ -1,0 +1,9 @@
+.retired-portrait,
+.retired-badge {
+  image-rendering: pixelated;
+}
+
+.retired-portrait {
+  display: block;
+  margin: 0 auto 0.75rem;
+}

@@ -1,8 +1,15 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 6 onboard scene is in place. The retired honor roll has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 7 retired honor roll is in place. The leaderboard has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 7 retired honor roll
+
+`/retired` lists aliases who have left the job. Each card is a recolored mugshot, the alias, and the badge icons they earned. Active aliases stay on the ship and off this page.
+
+- Sorted by alias. A badge that is not in the sheet uses the generic good or nasty icon.
+- `GET /api/retired` is the honor roll. The ship and the roll stay disjoint when status changes.
 
 ### 2026-10-12 — Phase 6 onboard scene
 
@@ -302,6 +309,8 @@ Ship tile map, waypoint graph, sprites for every `active` alias, idle/walk loop,
 ### Phase 7 — Retired honor roll
 
 A list of retired aliases: mugshot, alias, badges. No tile map.
+
+**Status:** done.
 
 **Done when:** the retired set and the active set are disjoint, the ship shows only active aliases, and the honor roll shows only retired aliases.
 
