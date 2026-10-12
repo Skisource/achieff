@@ -1,14 +1,9 @@
-import os
+import asyncio
 from pathlib import Path
 
 from quart import Quart, Response, jsonify
 
-from achieff import pages
-
-
-def data_dir() -> Path:
-    raw = os.environ.get("ACHIEFF_DATA_DIR", "data")
-    return Path(raw)
+from achieff import db, pages
 
 
 def create_app() -> Quart:
@@ -18,7 +13,7 @@ def create_app() -> Quart:
         template_folder=str(root / "templates"),
         static_folder=str(root / "static"),
     )
-    data_dir().mkdir(parents=True, exist_ok=True)
+    asyncio.run(db.migrate())
     pages.register(app)
 
     @app.get("/health")

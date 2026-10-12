@@ -4,6 +4,7 @@ version = "0.0.0"
 description = "Shipboard crew achievement board"
 requires-python = ">=3.14"
 dependencies = [
+    "aiosqlite",
     "hypercorn",
     "quart",
 ]

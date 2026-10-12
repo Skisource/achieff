@@ -1,8 +1,17 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 1 shell is in place. At home is now Retired. The domain model has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 2 domain is in place. Admin and keys have not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 2 domain
+
+SQLite on the data volume, seeded badges, and career scoring. The four pages are unchanged.
+
+- Startup migrates `achieff.sqlite3` and seeds Drilled through cable, Brought rig to muster, Baked the best cake, and Bought 5 rounds.
+- Crew status is `active` or `retired`, default `active`. Deleting an alias cascades awards and sessions. An alias cannot contain `@`.
+- Score is merit minus infamy. Ties break by earlier first award, then alias. A row with no awards sorts after a row that has one when the net is equal.
+- A test rejects forbidden column stems (`email`, `name`, `phone`, `dob`, `photo`) on the live schema.
 
 ### 2026-10-12 — Retired replaces At home
 
@@ -218,6 +227,8 @@ Tooling, Quart app, Bulma shell, nav for Onboard / At home / Leaderboard / Admin
 ### Phase 2 — Domain
 
 SQLite schema, migrations applied on startup, repository functions for crew, badges, awards. Seed the four example badges. GDPR column test. Scoring function with unit tests (net, ties, empty crew). Crew status is `active` or `retired`, default `active`.
+
+**Status:** done.
 
 **Done when:** tests create a crew row, pin a goody and a baddy, and assert net, merit, and infamy without a browser.
 
