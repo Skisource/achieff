@@ -17,15 +17,21 @@ PAGES = (
         key="onboard",
         label="Onboard",
         path="/",
-        empty_title="Nobody is on the drillship board yet.",
-        empty_body="Personnel marked onboard will walk the cutaway here.",
+        empty_title="The drillship is empty.",
+        empty_body=(
+            "Aliases still in the job walk this fantasy ship. "
+            "It stands for the whole industry."
+        ),
     ),
     Page(
-        key="home",
-        label="At home",
-        path="/home",
-        empty_title="Nobody is in the tower yet.",
-        empty_body="Personnel marked at home will show up in the skyscraper here.",
+        key="retired",
+        label="Retired",
+        path="/retired",
+        empty_title="No retired legends yet.",
+        empty_body=(
+            "Aliases who have left the workforce are honored here, "
+            "with the badges they earned."
+        ),
     ),
     Page(
         key="leaderboard",
@@ -40,7 +46,7 @@ PAGES = (
         path="/admin",
         empty_title="Nothing to manage yet.",
         empty_body=(
-            "Crew, keys, badges, and placement will be edited here. "
+            "Crew, keys, badges, and active or retired status will be edited here. "
             "This page stays open until sign-in lands."
         ),
     ),

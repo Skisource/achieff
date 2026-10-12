@@ -1,8 +1,17 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 1 shell is in place. The domain model has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 1 shell is in place. At home is now Retired. The domain model has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Retired replaces At home
+
+The board is a fantasy drillship for the industry, not a live personnel-on-board tracker. Hitch and leave are too noisy to follow. The ship shows aliases still in the job. People who have left the workforce leave the ship and keep their badges on a Retired honor roll.
+
+- Nav route `/home` is gone. `/retired` is the honor roll. The shell empty states match that.
+- Crew status is `active` or `retired`. Default is `active`. There is no `home` placement and no skyscraper.
+- The leaderboard stays one career list, active and retired together. A retired row is marked. The ship shows active aliases only.
+- Badge "retire" still means a badge is closed to new pins. That is separate from a person leaving the job.
 
 ### 2026-10-10 — Phase 1 skeleton
 
@@ -32,14 +41,14 @@ Greenfield plan for a single Docker container that shows a drillship crew as pix
 
 ## 1. What we are building
 
-Achieff is a shipboard web app. Crew appear only as nicknames and generated pixel-art mugshots. Admins pin badges on them for folklore highs and lows. Three public boards tell the story; admin is a fourth, gated surface.
+Achieff is a fantasy drillship for the whole industry. Crew appear only as nicknames and generated pixel-art mugshots. Admins pin badges on them for folklore highs and lows. The ship is the roster of legends still in the job. Three public boards tell the story; admin is a fourth, gated surface.
 
 | View | Who is on it | What it looks like |
 | --- | --- | --- |
-| Onboard | Personnel on board (POB) | Cutaway drillship, Terraria-style, figures walking the decks like an ant farm |
-| At home | Personnel marked at home | Cutaway skyscraper at night, one animated figure per lit apartment |
-| Leaderboard | Everyone with at least one badge | One ranked list: rank, mugshot, alias, merit, infamy, badge icons |
-| Admin | Admins only | Crew, keys, badges, awards, onboard/home placement |
+| Onboard | Aliases still in the job | Cutaway drillship, Terraria-style, figures walking the decks like an ant farm |
+| Retired | Aliases who have left the workforce | Honor roll: mugshot, alias, and the badges they earned. No second animated scene |
+| Leaderboard | Everyone with at least one badge, active and retired | One ranked list: rank, mugshot, alias, merit, infamy, badge icons, retired mark |
+| Admin | Admins only | Crew, keys, badges, awards, active/retired status |
 
 The boards are the product. Login exists so a later event layer can say "this alias did this" without collecting a mailbox. Account management beyond key issue and rotation waits until the boards are real.
 
@@ -66,7 +75,7 @@ These are the defaults the phases below build on.
 
 **Crew list.** There is no HR import. An admin types aliases. The git repo never contains a real roster.
 
-**Placement.** Each crew row is `onboard` or `home`. That single flag decides which animated board they appear on. A person on neither list is hidden from both scenes and can still sit on the leaderboard.
+**Status.** Each crew row is `active` or `retired`. New aliases start `active` and walk the ship. `retired` takes them off the ship and onto the honor roll. Career badges stay. The app does not track hitch, leave, or which real vessel someone is on.
 
 ## 3. GDPR posture
 
@@ -77,7 +86,7 @@ Stored per person:
 - Alias (unique, case-insensitive)
 - Argon2 hash of the hex key
 - Role (`crew` or `admin`)
-- Placement (`onboard` or `home`)
+- Status (`active` or `retired`)
 - Sprite variant (an integer into a shared art kit, not a photo)
 - Awards: badge id, timestamp, awarding admin id
 
@@ -96,7 +105,7 @@ Lawful basis, retention period, and who is controller stay with the company. The
 
 ```
 crew
-  id, alias, alias_normalized, key_hash, role, placement,
+  id, alias, alias_normalized, key_hash, role, status,
   sprite_variant, created_at
 
 badge
@@ -116,17 +125,17 @@ Sessions are random tokens, hashed at rest, cookie `HttpOnly`, `SameSite=Lax`, `
 
 ## 5. Pages
 
-**Onboard.** A static tile map of a drillship cutaway: sea, hull, engine room, moonpool, drill floor, derrick, accommodation (mess, gym, cabins), helideck. Walkable floors are a waypoint graph. Each onboard alias is a sprite that idles, then walks a short random route, then idles again. No pathfinding library: the map author lists the edges. Hover or tap shows alias and badge counts. The board polls placement every 15 seconds so a muster change shows up without a deploy.
+**Onboard.** A static tile map of a drillship cutaway: sea, hull, engine room, moonpool, drill floor, derrick, accommodation (mess, gym, cabins), helideck. Walkable floors are a waypoint graph. Each active alias is a sprite that idles, then walks a short random route, then idles again. No pathfinding library: the map author lists the edges. Hover or tap shows alias and badge counts. The board polls status every 15 seconds so a retirement shows up without a deploy. Retired aliases do not appear.
 
-**At home.** A night skyscraper, floors of identical apartment tiles, windows lit where a home alias lives. Figures pace the room or stand at the window. Overflow adds floors and the page scrolls. Same hover card as onboard.
+**Retired.** An honor roll of aliases with status `retired`: mugshot, alias, and badge icons. Sorted by alias. No walk cycle and no skyscraper. Active aliases do not appear.
 
-**Leaderboard.** Callout pair (good boy, nasty), then one table. Columns: rank, mugshot, alias, net, merit, infamy, badge icons. Goody icons and baddy icons are visually distinct (gold rim vs red rim) so the row reads without opening a legend. Empty state explains that badges are awarded from admin.
+**Leaderboard.** Callout pair (good boy, nasty), then one table of active and retired aliases together. Columns: rank, mugshot, alias, net, merit, infamy, badge icons, and a retired mark when status is `retired`. A retired alias can still hold a callout; the score is a career score. Goody icons and baddy icons are visually distinct (gold rim vs red rim) so the row reads without opening a legend. Empty state explains that badges are awarded from admin.
 
 **Login.** Two fields, alias and key. Generic failure text. Rate limit on the route. Successful login lands on the leaderboard with a small "signed in as {alias}" chip. Logout clears the session.
 
 **Admin.**
 
-- Crew: add alias, set placement, reissue key (modal shows the new key once), delete crew.
+- Crew: add alias, set status (`active` or `retired`), reissue key (modal shows the new key once), delete crew.
 - Badges: add, edit title, set polarity, retire (hidden from new awards, kept on old rows).
 - Awards: pick alias, pick badge, pin or unpin.
 - First boot: if the database has no admin, read `ACHIEFF_BOOTSTRAP_ALIAS` and generate a key, print it once to stdout, store the hash. If the env var is missing, the process refuses to serve admin and the boards render empty.
@@ -149,10 +158,9 @@ Sheets:
 | Asset | Size | Notes |
 | --- | --- | --- |
 | Character walk | 16×24, 4 frames, left and right | One base body. Coverall and hard-hat colors swapped per variant |
-| Character idle | 16×24, 2 frames | Used in apartments and when a route finishes |
-| Mugshot | 32×32 | Head and shoulders, same variant colors, used on the leaderboard |
+| Character idle | 16×24, 2 frames | Used when a walking route finishes |
+| Mugshot | 32×32 | Head and shoulders, same variant colors, used on the leaderboard and the retired roll |
 | Ship tiles | 16×16 | Hull, deck, derrick, moonpool, mess, helideck, sea |
-| Tower tiles | 16×16 | Floor slab, window lit, window dark, roof, lobby |
 | Badge icons | 16×16 | One per seeded badge, plus a generic goody and generic baddy for admin-created badges |
 
 Maps are JSON: tile layers plus a waypoint graph. The renderer is a single canvas (or a stack of canvases: tiles, then sprites) driven by `requestAnimationFrame`. Integer scale only, so pixels stay square.
@@ -203,19 +211,19 @@ Write this document. No application code.
 
 Tooling, Quart app, Bulma shell, nav for Onboard / At home / Leaderboard / Admin, health route, empty states, Dockerfile that builds, compose file with a `/data` volume, dev port ≥ 10000.
 
-**Status:** done.
+**Status:** done. Nav amended 2026-10-12: At home became Retired.
 
 **Done when:** `docker compose up` serves the four empty pages and `/health` returns ok.
 
 ### Phase 2 — Domain
 
-SQLite schema, migrations applied on startup, repository functions for crew, badges, awards. Seed the four example badges. GDPR column test. Scoring function with unit tests (net, ties, empty crew).
+SQLite schema, migrations applied on startup, repository functions for crew, badges, awards. Seed the four example badges. GDPR column test. Scoring function with unit tests (net, ties, empty crew). Crew status is `active` or `retired`, default `active`.
 
 **Done when:** tests create a crew row, pin a goody and a baddy, and assert net, merit, and infamy without a browser.
 
 ### Phase 3 — Admin and keys
 
-Bootstrap admin. Crew add / placement / delete. Key issue and reissue, plaintext shown once. Badge create and retire. Award pin and unpin. CSRF on forms. Admin routes reject a non-admin session.
+Bootstrap admin. Crew add / set status / delete. Key issue and reissue, plaintext shown once. Badge create and retire (close a badge to new pins). Award pin and unpin. CSRF on forms. Admin routes reject a non-admin session.
 
 **Done when:** a fresh database can be populated entirely from the admin UI, and a deleted alias disappears from queries.
 
@@ -229,19 +237,19 @@ Login and logout, session cookie, rate limit, "signed in as" chip. Boards stay p
 
 Generate the sheets in section 6, commit them under `static/art/`, document the palette and frame layout next to the files. A tiny preview page (admin or `/dev/art`, off in production) flips through frames so a bad sheet is obvious.
 
-**Done when:** walk, idle, mugshot, both tilesets, and the seeded badge icons exist and sit on the 16px grid.
+**Done when:** walk, idle, mugshot, the ship tileset, and the seeded badge icons exist and sit on the 16px grid.
 
 ### Phase 6 — Onboard scene
 
-Ship tile map, waypoint graph, sprites for every `onboard` crew, idle/walk loop, hover card, 15s refresh. Home crew do not appear.
+Ship tile map, waypoint graph, sprites for every `active` alias, idle/walk loop, hover card, 15s refresh. Retired aliases do not appear.
 
-**Done when:** marking someone onboard in admin puts their sprite on the ship after a refresh, and marking them home removes it.
+**Done when:** marking someone retired in admin removes their sprite after a refresh, and marking them active puts it back.
 
-### Phase 7 — At home scene
+### Phase 7 — Retired honor roll
 
-Tower tile map, one apartment slot per home alias, idle animation, overflow floors, same hover card.
+A list of retired aliases: mugshot, alias, badges. No tile map.
 
-**Done when:** the home set and the onboard set are disjoint and both boards match admin placement.
+**Done when:** the retired set and the active set are disjoint, the ship shows only active aliases, and the honor roll shows only retired aliases.
 
 ### Phase 8 — Leaderboard
 
@@ -267,7 +275,7 @@ Held here so the earlier phases leave seams for them.
 
 ## 9. Out of scope for the whole v1 arc
 
-Real names, photos, HR sync, email, password reset, public internet accounts, peer voting that writes badges without admin, mobile native apps, 3D, sound, and anything that turns a badge into a disciplinary record.
+Real names, photos, HR sync, email, password reset, public internet accounts, peer voting that writes badges without admin, mobile native apps, 3D, sound, hitch and leave tracking, a live personnel-on-board board for one vessel, the skyscraper, and anything that turns a badge into a disciplinary record.
 
 ## 10. Risks
 
@@ -281,4 +289,4 @@ Real names, photos, HR sync, email, password reset, public internet accounts, pe
 
 Phase 1 → 2 → 3 → 5 → 6 → 7 → 8 → 4 → 9.
 
-Login (Phase 4) can land any time after Phase 3. Art before the scenes, leaderboard after both scenes so the mugshots already exist. Delivery last, once the boards are worth putting on a TV.
+Login (Phase 4) can land any time after Phase 3. Art before the ship scene. Leaderboard after the ship and the retired roll, so the mugshots already exist. Delivery last, once the boards are worth putting on a TV.

@@ -19,6 +19,14 @@ async def test_empty_page(application: Quart, page: pages_module.Page) -> None:
     assert "navbar-burger" in body
 
 
+async def test_at_home_route_is_gone(application: Quart) -> None:
+    client = application.test_client()
+
+    response = await client.get("/home")
+
+    assert response.status_code == 404
+
+
 async def test_bulma_is_vendored(application: Quart) -> None:
     client = application.test_client()
 
