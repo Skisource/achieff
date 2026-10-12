@@ -1,8 +1,16 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 7 retired honor roll is in place. The leaderboard has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 8 leaderboard is in place. Ship delivery has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 8 leaderboard
+
+`/leaderboard` is one career list. Active and retired aliases with at least one badge are ranked by net, then earlier first award, then alias.
+
+- The good-boy callout is the top row. The nasty callout is the bottom row. A retired alias can hold either.
+- Each row shows rank, mugshot, alias, net, good count, nasty count, badge icons, and a retired mark. Good icons have a gold rim and nasty icons a red rim.
+- Aliases with no badges stay off the table. The empty state says badges are awarded from admin.
 
 ### 2026-10-12 — Phase 7 retired honor roll
 
@@ -317,6 +325,8 @@ A list of retired aliases: mugshot, alias, badges. No tile map.
 ### Phase 8 — Leaderboard
 
 Callouts, ranked table, mugshots, badge icons, empty state. Sorting matches section 2, covered by the Phase 2 tests plus one route test against a seeded database.
+
+**Status:** done.
 
 **Done when:** the good-boy and nasty callouts match the top and bottom of the table.
 

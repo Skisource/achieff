@@ -14,6 +14,7 @@ class Standing:
     net: int
     first_award_at: Optional[str]
     status: str = "active"
+    sprite_variant: int = 0
 
 
 def net(merit: int, infamy: int) -> int:
@@ -47,6 +48,7 @@ def _standing_from_row(row) -> Standing:
         net=net(merit, infamy),
         first_award_at=row["first_award_at"],
         status=str(row["status"]),
+        sprite_variant=int(row["sprite_variant"]),
     )
 
 
@@ -71,6 +73,7 @@ _SCORE_FROM = """
 SELECT
     c.alias AS alias,
     c.status AS status,
+    c.sprite_variant AS sprite_variant,
     COALESCE(SUM(CASE WHEN b.polarity = 'goody' THEN 1 ELSE 0 END), 0) AS merit,
     COALESCE(SUM(CASE WHEN b.polarity = 'baddy' THEN 1 ELSE 0 END), 0) AS infamy,
     MIN(a.awarded_at) AS first_award_at

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard · Achieff{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/leaderboard.css') }}">
+{% endblock %}
+{% block content %}
+  <h1 class="title">Leaderboard</h1>
+  <div id="leaderboard-empty">
+    <p class="has-text-weight-semibold">{{ page.empty_title }}</p>
+    <p>{{ page.empty_body }}</p>
+  </div>
+  <div id="leaderboard-callouts" class="columns is-hidden">
+    <div class="column">
+      <article class="box" id="good-boy">
+        <p class="heading">Good boy</p>
+        <canvas class="leaderboard-portrait"></canvas>
+        <p class="title is-4" data-alias></p>
+        <p data-score></p>
+      </article>
+    </div>
+    <div class="column">
+      <article class="box" id="nasty">
+        <p class="heading">Nasty</p>
+        <canvas class="leaderboard-portrait"></canvas>
+        <p class="title is-4" data-alias></p>
+        <p data-score></p>
+      </article>
+    </div>
+  </div>
+  <div class="table-container">
+    <table class="table is-fullwidth is-striped is-hidden" id="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Mugshot</th>
+          <th>Alias</th>
+          <th>Net</th>
+          <th>Good</th>
+          <th>Nasty</th>
+          <th>Badges</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <script src="{{ url_for('static', filename='js/leaderboard.js') }}"></script>
+{% endblock %}

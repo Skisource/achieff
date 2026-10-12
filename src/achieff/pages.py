@@ -38,7 +38,10 @@ PAGES = (
         label="Leaderboard",
         path="/leaderboard",
         empty_title="No badges awarded yet.",
-        empty_body="Rank, alias, and badge icons will appear in one list.",
+        empty_body=(
+            "Badges are awarded from admin. "
+            "Rank, alias, and icons will appear in one list."
+        ),
     ),
     Page(
         key="admin",
@@ -52,7 +55,7 @@ PAGES = (
 
 def register(app: Quart) -> None:
     for page in PAGES:
-        if page.key in {"admin", "onboard", "retired"}:
+        if page.key in {"admin", "onboard", "retired", "leaderboard"}:
             continue
         _bind(app, page)
 

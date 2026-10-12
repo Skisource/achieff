@@ -1,0 +1,17 @@
+.leaderboard-portrait,
+.leaderboard-badge {
+  image-rendering: pixelated;
+}
+
+.leaderboard-portrait {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.badge-goody {
+  border: 2px solid #f2c14e;
+}
+
+.badge-baddy {
+  border: 2px solid #c23b4a;
+}
