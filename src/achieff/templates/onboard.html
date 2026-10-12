@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Onboard · Achieff{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/onboard.css') }}">
+{% endblock %}
+{% block content %}
+  <h1 class="title">Onboard</h1>
+  <div id="onboard-empty">
+    <p class="has-text-weight-semibold">{{ page.empty_title }}</p>
+    <p>{{ page.empty_body }}</p>
+  </div>
+  <div class="onboard-scroll mt-4">
+    <canvas id="onboard-canvas"></canvas>
+  </div>
+  <ul id="onboard-roster" class="onboard-roster"></ul>
+  <div id="crew-card" class="box onboard-card" hidden>
+    <p id="crew-card-alias" class="has-text-weight-semibold"></p>
+    <p id="crew-card-badges"></p>
+  </div>
+  <script src="{{ url_for('static', filename='js/onboard.js') }}"></script>
+{% endblock %}

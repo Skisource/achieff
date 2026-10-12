@@ -3,7 +3,7 @@ from pathlib import Path
 
 from quart import Quart, Response, jsonify
 
-from achieff import admin, art, auth, db, pages
+from achieff import admin, art, auth, db, onboard, pages
 
 
 def create_app() -> Quart:
@@ -19,6 +19,7 @@ def create_app() -> Quart:
     auth.register(app)
     admin.register(app)
     art.register(app)
+    onboard.register(app)
 
     @app.get("/health")
     async def health() -> Response:

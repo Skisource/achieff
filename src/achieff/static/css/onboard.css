@@ -1,0 +1,29 @@
+.onboard-scroll {
+  background: #121826;
+  overflow-x: auto;
+}
+
+#onboard-canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.onboard-card {
+  display: none;
+  margin: 0;
+  max-width: 16rem;
+  pointer-events: none;
+  position: fixed;
+  z-index: 30;
+}
+
+.onboard-card.is-visible {
+  display: block;
+}
+
+.onboard-roster {
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  width: 1px;
+}

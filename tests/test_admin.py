@@ -195,7 +195,9 @@ async def test_crew_key_cannot_open_admin(admin_app: tuple[Quart, str]) -> None:
 async def test_wrong_key_matches_unknown_alias(admin_app: tuple[Quart, str]) -> None:
     application, admin_key = admin_app
     client = application.test_client()
-    wrong = await _login(client, _BOOTSTRAP_ALIAS, admin_key[:-1] + "0")
+    wrong = await _login(
+        client, _BOOTSTRAP_ALIAS, "0000-0000-0000-0000-0000-0000-0000-0001"
+    )
     missing = await _login(client, "Nobody", admin_key)
     wrong_body = await wrong.get_data(as_text=True)
     missing_body = await missing.get_data(as_text=True)

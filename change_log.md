@@ -1,8 +1,16 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 5 art kit is in place. The drillship scene has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 6 onboard scene is in place. The retired honor roll has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 6 onboard scene
+
+The onboard page is the drillship cutaway. Active aliases walk the decks. Retired aliases stay off the ship.
+
+- The tile map and waypoint edges are in `static/art/ship_map.json`. Sprites idle, then walk one authored edge, then idle again.
+- Hover or tap shows the alias and good/nasty counts. The roster is fetched again every 15 seconds.
+- `GET /api/onboard` lists only `active` crew. Marking someone retired removes them on the next fetch; marking them active puts them back.
 
 ### 2026-10-12 — Phase 5 art kit
 
@@ -286,6 +294,8 @@ Generate the sheets in section 6, commit them under `static/art/`, document the 
 ### Phase 6 — Onboard scene
 
 Ship tile map, waypoint graph, sprites for every `active` alias, idle/walk loop, hover card, 15s refresh. Retired aliases do not appear.
+
+**Status:** done.
 
 **Done when:** marking someone retired in admin removes their sprite after a refresh, and marking them active puts it back.
 

@@ -52,7 +52,7 @@ PAGES = (
 
 def register(app: Quart) -> None:
     for page in PAGES:
-        if page.key == "admin":
+        if page.key in {"admin", "onboard"}:
             continue
         _bind(app, page)
 
