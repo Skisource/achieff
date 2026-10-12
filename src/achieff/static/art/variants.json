@@ -1,0 +1,38 @@
+{
+  "coverall": "#e07a3d",
+  "hat": "#f2c14e",
+  "variants": [
+    {
+      "coverall": "#e07a3d",
+      "hat": "#f2c14e"
+    },
+    {
+      "coverall": "#3d6ea8",
+      "hat": "#f2c14e"
+    },
+    {
+      "coverall": "#3aa76d",
+      "hat": "#f2f2f2"
+    },
+    {
+      "coverall": "#c23b4a",
+      "hat": "#f2c14e"
+    },
+    {
+      "coverall": "#e07a3d",
+      "hat": "#3d6ea8"
+    },
+    {
+      "coverall": "#3d6ea8",
+      "hat": "#3aa76d"
+    },
+    {
+      "coverall": "#5c6770",
+      "hat": "#f2c14e"
+    },
+    {
+      "coverall": "#c23b4a",
+      "hat": "#f2f2f2"
+    }
+  ]
+}

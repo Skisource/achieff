@@ -1,8 +1,17 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 4 crew login is in place. The art kit has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 5 art kit is in place. The drillship scene has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 5 art kit
+
+Pixel sheets on the 16px grid, drawn by `scripts/build_art.py` so every frame shares one outline and one recolor pair. Layout is in `static/art/layout.md`.
+
+- Walk is 16×24, four poses, right then mirrored left. Idle is standing and a 1px bob, both directions. Mugshot is 32×32.
+- Ship tiles, left to right: sea, hull, deck, derrick, moonpool, mess, helideck. Badge icons follow the four seeded titles, then a generic goody and a generic baddy.
+- Coverall `#e07a3d` and hard hat `#f2c14e` are the only colors the eight variants replace. The pairs live in `variants.json`.
+- `/dev/art` steps through frames at 4×. It answers 404 when `ACHIEFF_ENV=production`.
 
 ### 2026-10-12 — Phase 4 crew login
 
@@ -269,6 +278,8 @@ Login and logout, session cookie, rate limit, "signed in as" chip. Boards stay p
 ### Phase 5 — Art kit
 
 Generate the sheets in section 6, commit them under `static/art/`, document the palette and frame layout next to the files. A tiny preview page (admin or `/dev/art`, off in production) flips through frames so a bad sheet is obvious.
+
+**Status:** done.
 
 **Done when:** walk, idle, mugshot, the ship tileset, and the seeded badge icons exist and sit on the 16px grid.
 

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Art preview · Achieff{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/art_preview.css') }}">
+{% endblock %}
+{% block content %}
+  <h1 class="title">Art preview</h1>
+  <p class="mb-5">Sheets are drawn at 4× with a pixel grid. Coverall and hard-hat colors are the recolor keys.</p>
+
+  <section class="box" data-art-player data-kind="walk"
+    data-sheet="{{ url_for('static', filename='art/walk.png') }}"
+    data-variants="{{ url_for('static', filename='art/variants.json') }}"
+    data-frames="8" data-columns="4" data-frame-width="16" data-frame-height="24">
+    <h2 class="title is-4">Walk</h2>
+    <p data-frame-label>Right 1</p>
+    <div class="pixel-stage mb-4"><canvas></canvas></div>
+    <div class="buttons">
+      <button class="button" type="button" data-prev>Previous frame</button>
+      <button class="button" type="button" data-next>Next frame</button>
+    </div>
+    <div class="is-flex is-flex-wrap-wrap" data-variants></div>
+  </section>
+
+  <section class="box" data-art-player data-kind="idle"
+    data-sheet="{{ url_for('static', filename='art/idle.png') }}"
+    data-variants="{{ url_for('static', filename='art/variants.json') }}"
+    data-frames="4" data-columns="2" data-frame-width="16" data-frame-height="24">
+    <h2 class="title is-4">Idle</h2>
+    <p data-frame-label>Right stand</p>
+    <div class="pixel-stage mb-4"><canvas></canvas></div>
+    <div class="buttons">
+      <button class="button" type="button" data-prev>Previous frame</button>
+      <button class="button" type="button" data-next>Next frame</button>
+    </div>
+    <div class="is-flex is-flex-wrap-wrap" data-variants></div>
+  </section>
+
+  <section class="box" data-art-player data-kind="mugshot"
+    data-sheet="{{ url_for('static', filename='art/mugshot.png') }}"
+    data-variants="{{ url_for('static', filename='art/variants.json') }}"
+    data-frames="1" data-columns="1" data-frame-width="32" data-frame-height="32">
+    <h2 class="title is-4">Mugshot</h2>
+    <div class="pixel-stage mb-4"><canvas></canvas></div>
+    <div class="is-flex is-flex-wrap-wrap" data-variants></div>
+  </section>
+
+  <section class="box">
+    <h2 class="title is-4">Ship tiles</h2>
+    <img class="pixel-sheet" src="{{ url_for('static', filename='art/ship.png') }}" alt="Sea, hull, deck, derrick, moonpool, mess, and helideck tiles">
+    <p>sea, hull, deck, derrick, moonpool, mess, helideck</p>
+  </section>
+
+  <section class="box">
+    <h2 class="title is-4">Badge icons</h2>
+    <img class="pixel-sheet" src="{{ url_for('static', filename='art/badges.png') }}" alt="Cable, muster, cake, rounds, good, and nasty icons">
+    <p>drilled through cable, brought rig to muster, baked the best cake, bought 5 rounds, goody, baddy</p>
+  </section>
+  <script src="{{ url_for('static', filename='js/art_preview.js') }}"></script>
+{% endblock %}

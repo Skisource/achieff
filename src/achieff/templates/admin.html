@@ -2,6 +2,9 @@
 {% block title %}Admin · Achieff{% endblock %}
 {% block content %}
   <h1 class="title">Admin</h1>
+  {% if art_preview %}
+    <p class="mb-4"><a href="{{ url_for('art_preview') }}">Art preview</a></p>
+  {% endif %}
   {% if error %}
     <article class="message is-danger">
       <div class="message-body">{{ error }}</div>

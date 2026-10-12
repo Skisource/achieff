@@ -130,7 +130,9 @@ async def test_reissue_replaces_the_old_key(admin_app: tuple[Quart, str]) -> Non
     assert keys.verify_key(refreshed["key_hash"], second)
 
 
-async def test_crew_login_lands_on_the_leaderboard(admin_app: tuple[Quart, str]) -> None:
+async def test_crew_login_lands_on_the_leaderboard(
+    admin_app: tuple[Quart, str],
+) -> None:
     application, admin_key = admin_app
     client = application.test_client()
     await _login(client, _BOOTSTRAP_ALIAS, admin_key)
@@ -159,7 +161,9 @@ async def test_login_locks_after_repeated_failures(
     monkeypatch.setattr(login_limit, "MAX_FAILURES", 2)
     application, admin_key = admin_app
     client = application.test_client()
-    wrong = await _login(client, _BOOTSTRAP_ALIAS, "0000-0000-0000-0000-0000-0000-0000-0000")
+    wrong = await _login(
+        client, _BOOTSTRAP_ALIAS, "0000-0000-0000-0000-0000-0000-0000-0000"
+    )
     missing = await _login(client, "Nobody", admin_key)
     blocked = await _login(client, _BOOTSTRAP_ALIAS, admin_key)
 
@@ -168,7 +172,9 @@ async def test_login_locks_after_repeated_failures(
     assert "Alias or key is wrong." in await wrong.get_data(as_text=True)
     assert "Alias or key is wrong." in await missing.get_data(as_text=True)
     assert blocked.status_code == 429
-    assert "Too many attempts. Try again shortly." in await blocked.get_data(as_text=True)
+    assert "Too many attempts. Try again shortly." in await blocked.get_data(
+        as_text=True
+    )
     assert (await client.get("/admin")).status_code == 302
 
 

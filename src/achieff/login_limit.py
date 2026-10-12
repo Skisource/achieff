@@ -29,7 +29,5 @@ def reset() -> None:
 
 def _recent(client: str, now: float) -> list[float]:
     return [
-        stamp
-        for stamp in _failures.get(client, [])
-        if now - stamp < WINDOW_SECONDS
+        stamp for stamp in _failures.get(client, []) if now - stamp < WINDOW_SECONDS
     ]

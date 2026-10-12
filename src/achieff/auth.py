@@ -3,7 +3,7 @@ import secrets
 
 from quart import Quart, Response, g, redirect, render_template, request, url_for
 
-from achieff import crew, db, keys, login_limit, pages, sessions
+from achieff import artkit, crew, db, keys, login_limit, pages, sessions
 
 SESSION_COOKIE = "achieff_session"
 CSRF_COOKIE = "achieff_csrf"
@@ -123,6 +123,7 @@ def _template_context() -> dict:
         "viewer": getattr(g, "viewer", None),
         "csrf": getattr(g, "csrf", ""),
         "pages": pages.PAGES,
+        "art_preview": artkit.preview_enabled(),
     }
 
 
