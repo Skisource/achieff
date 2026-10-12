@@ -1,8 +1,16 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 3 admin is in place. Crew login polish has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 4 crew login is in place. The art kit has not started.
 
 ## Unreleased
+
+### 2026-10-12 — Phase 4 crew login
+
+Crew can sign in with the same alias and key as an admin. The boards stay readable without a session.
+
+- A crew key lands on the leaderboard. The navbar shows "Signed in as {alias}" and a log out button. An admin key still opens `/admin`. A crew key gets 403 there.
+- A wrong key and an unknown alias share the message "Alias or key is wrong."
+- Eight failures from the same address within 15 minutes lock the login route. Later attempts get "Too many attempts. Try again shortly." A successful login clears that address.
 
 ### 2026-10-12 — Phase 3 admin and keys
 
@@ -12,7 +20,7 @@ Admin can sign in with an alias and a hex key, then run the roster from `/admin`
 - Adding or reissuing a key shows the new key once on the admin page. The old key stops working at reissue.
 - Admin can add an alias, set active or retired, delete an alias, add and rename badges, close a badge to new pins, and pin or unpin awards. Forms carry a CSRF token. A crew session gets 403 on `/admin`.
 - Deleting an alias removes it from queries. The signed-in admin and the last admin cannot be deleted.
-- Login rate limiting stays in Phase 4.
+- Login rate limiting is in Phase 4.
 
 ### 2026-10-12 — Phase 2 domain
 
@@ -254,6 +262,8 @@ Bootstrap admin. Crew add / set status / delete. Key issue and reissue, plaintex
 
 Login and logout, session cookie, rate limit, "signed in as" chip. Boards stay public. Wrong key and unknown alias share one error string.
 
+**Status:** done.
+
 **Done when:** a crew key opens a session and an admin key opens admin; a crew key does not.
 
 ### Phase 5 — Art kit
@@ -282,7 +292,7 @@ Callouts, ranked table, mugshots, badge icons, empty state. Sorting matches sect
 
 ### Phase 9 — Ship delivery
 
-Non-root container user, volume for SQLite, documented backup (copy the db file), bootstrap env vars in `compose.yaml`, request size and login rate limits, a short runbook at the top of this log's delivery section once the commands are real. `ruff format` and `ruff check` clean. Pytest green inside the image.
+Non-root container user, volume for SQLite, documented backup (copy the db file), bootstrap env vars in `compose.yaml`, request size limits, a short runbook at the top of this log's delivery section once the commands are real. `ruff format` and `ruff check` clean. Pytest green inside the image.
 
 **Done when:** a second machine can `docker compose up` and an admin can run the boards from a browser on the ship network.
 

@@ -130,6 +130,48 @@ async def test_reissue_replaces_the_old_key(admin_app: tuple[Quart, str]) -> Non
     assert keys.verify_key(refreshed["key_hash"], second)
 
 
+async def test_crew_login_lands_on_the_leaderboard(admin_app: tuple[Quart, str]) -> None:
+    application, admin_key = admin_app
+    client = application.test_client()
+    await _login(client, _BOOTSTRAP_ALIAS, admin_key)
+    await _submit(client, {"action": "add_crew", "alias": "Rigger", "status": "active"})
+    crew_key = _issued_key(await (await client.get("/admin")).get_data(as_text=True))
+    await _logout(client)
+
+    signed_in = await _login(client, "Rigger", crew_key)
+    board = await client.get("/leaderboard")
+    body = await board.get_data(as_text=True)
+    onboard = await client.get("/")
+
+    assert signed_in.status_code == 303
+    assert signed_in.headers["Location"].endswith("/leaderboard")
+    assert board.status_code == 200
+    assert "Signed in as Rigger" in body
+    assert onboard.status_code == 200
+
+
+async def test_login_locks_after_repeated_failures(
+    admin_app: tuple[Quart, str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    from achieff import login_limit
+
+    monkeypatch.setattr(login_limit, "MAX_FAILURES", 2)
+    application, admin_key = admin_app
+    client = application.test_client()
+    wrong = await _login(client, _BOOTSTRAP_ALIAS, "0000-0000-0000-0000-0000-0000-0000-0000")
+    missing = await _login(client, "Nobody", admin_key)
+    blocked = await _login(client, _BOOTSTRAP_ALIAS, admin_key)
+
+    assert wrong.status_code == 401
+    assert missing.status_code == 401
+    assert "Alias or key is wrong." in await wrong.get_data(as_text=True)
+    assert "Alias or key is wrong." in await missing.get_data(as_text=True)
+    assert blocked.status_code == 429
+    assert "Too many attempts. Try again shortly." in await blocked.get_data(as_text=True)
+    assert (await client.get("/admin")).status_code == 302
+
+
 async def test_crew_key_cannot_open_admin(admin_app: tuple[Quart, str]) -> None:
     application, admin_key = admin_app
     client = application.test_client()

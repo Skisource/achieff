@@ -36,7 +36,9 @@
         </div>
         {% if viewer %}
           <div class="navbar-end">
-            <div class="navbar-item">{{ viewer.alias }}</div>
+            <div class="navbar-item">
+              <span class="tag is-light">Signed in as {{ viewer.alias }}</span>
+            </div>
             <div class="navbar-item">
               <form method="post" action="{{ url_for('logout') }}">
                 <input type="hidden" name="csrf" value="{{ csrf }}">

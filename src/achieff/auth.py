@@ -3,11 +3,12 @@ import secrets
 
 from quart import Quart, Response, g, redirect, render_template, request, url_for
 
-from achieff import crew, db, keys, pages, sessions
+from achieff import crew, db, keys, login_limit, pages, sessions
 
 SESSION_COOKIE = "achieff_session"
 CSRF_COOKIE = "achieff_csrf"
 LOGIN_ERROR = "Alias or key is wrong."
+RATE_LIMIT_ERROR = "Too many attempts. Try again shortly."
 _SECRET_MIN_LENGTH = 16
 
 
@@ -30,6 +31,13 @@ def register(app: Quart) -> None:
                 "login.html", page=None, error=LOGIN_ERROR
             ), 400
 
+        client = request.remote_addr or "unknown"
+        if login_limit.too_many(client):
+            body = await render_template(
+                "login.html", page=None, error=RATE_LIMIT_ERROR
+            )
+            return body, 429
+
         connection = await db.connect()
         try:
             row = await _matching_crew(
@@ -38,11 +46,14 @@ def register(app: Quart) -> None:
                 str(form.get("key", "")),
             )
             if row is None:
+                login_limit.record_failure(client)
                 body = await render_template("login.html", page=None, error=LOGIN_ERROR)
                 return body, 401
             token = await sessions.start(connection, int(row["id"]))
         finally:
             await connection.close()
+
+        login_limit.clear(client)
 
         destination = "admin" if row["role"] == "admin" else "leaderboard"
         response = redirect(url_for(destination), 303)

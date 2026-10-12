@@ -5,7 +5,14 @@ from pytest import MonkeyPatch
 from quart import Quart
 
 from achieff import app as app_module
-from achieff import db
+from achieff import db, login_limit
+
+
+@pytest.fixture(autouse=True)
+def _reset_login_limit() -> None:
+    login_limit.reset()
+    yield
+    login_limit.reset()
 
 
 @pytest.fixture
