@@ -1,12 +1,11 @@
 const BASE_COVERALL = [224, 122, 61];
 const BASE_HAT = [242, 193, 78];
-const REFRESH_MS = 15000;
 const MUGSHOT = 32;
 const BADGE = 16;
 
 document.addEventListener("DOMContentLoaded", () => {
   refreshBoard();
-  window.setInterval(refreshBoard, REFRESH_MS);
+  listenForBoardChanges(refreshBoard);
 });
 
 async function refreshBoard() {

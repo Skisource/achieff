@@ -2,7 +2,6 @@ const BASE_COVERALL = [224, 122, 61];
 const BASE_HAT = [242, 193, 78];
 const FRAME_MS = 140;
 const IDLE_MS = 420;
-const REFRESH_MS = 15000;
 const WALK_SPEED = 1.6;
 
 const state = {
@@ -50,7 +49,7 @@ async function startScene(canvas) {
   canvas.width = state.mapCanvas.width;
   canvas.height = state.mapCanvas.height;
   await refreshCrew();
-  window.setInterval(refreshCrew, REFRESH_MS);
+  listenForBoardChanges(refreshCrew);
   requestAnimationFrame((now) => {
     state.last = now;
     tick(now);
@@ -81,6 +80,7 @@ async function refreshCrew() {
     sprite.merit = person.merit;
     sprite.infamy = person.infamy;
     sprite.variant = person.sprite_variant;
+    sprite.station = person.station;
     next.delete(sprite.alias);
   }
   for (const person of next.values()) {
@@ -93,15 +93,17 @@ async function refreshCrew() {
 }
 
 function spawn(person) {
-  const waypoint = randomItem(state.map.waypoints);
+  const preferred = stationPoint(person.station);
+  const start = preferred || randomItem(state.map.waypoints);
   return {
     alias: person.alias,
     variant: person.sprite_variant,
+    station: person.station,
     merit: person.merit,
     infamy: person.infamy,
-    x: waypoint.x,
-    y: waypoint.y,
-    waypoint: waypoint.id,
+    x: start.x,
+    y: start.y,
+    waypoint: start.id,
     target: null,
     mode: "idle",
     until: performance.now() + 600 + Math.random() * 1400,
@@ -112,7 +114,7 @@ function spawn(person) {
 function stepSprite(sprite, dt, now) {
   if (sprite.mode === "idle") {
     if (now >= sprite.until) {
-      const next = randomItem(neighbors(sprite.waypoint));
+      const next = chooseNext(sprite);
       if (next === undefined) {
         sprite.until = now + 1000;
         return;
@@ -306,6 +308,35 @@ function renderRoster(crew) {
     item.textContent = person.alias;
     list.append(item);
   }
+}
+
+const STATIONS = { mess: 2, drill: 12 };
+
+function stationPoint(station) {
+  const id = STATIONS[station];
+  if (id === undefined) {
+    return null;
+  }
+  return waypoint(id);
+}
+
+function chooseNext(sprite) {
+  const options = neighbors(sprite.waypoint);
+  const goal = stationPoint(sprite.station);
+  if (!goal || sprite.waypoint === goal.id || options.length === 0) {
+    return randomItem(options);
+  }
+  let best = options[0];
+  let bestDistance = Infinity;
+  for (const id of options) {
+    const point = waypoint(id);
+    const distance = Math.abs(point.x - goal.x) + Math.abs(point.y - goal.y);
+    if (distance < bestDistance) {
+      best = id;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }
 
 function neighbors(id) {

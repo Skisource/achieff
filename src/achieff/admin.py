@@ -2,10 +2,16 @@ from typing import Optional
 
 from quart import Quart, Response, abort, g, redirect, render_template, request, url_for
 
-from achieff import auth, awards, badges, crew, db, keys, pages
+from achieff import auth, awards, badges, crew, db, events, keys, live, pages
 from achieff.awards import AwardError
-from achieff.badges import BadgeNotFound, BadgePolarityError, BadgeTitleError
+from achieff.badges import (
+    BadgeNotFound,
+    BadgePolarityError,
+    BadgeTitleError,
+    BadgeWeightError,
+)
 from achieff.crew import CrewAliasError, CrewNotFound, CrewStatusError
+from achieff.events import EventError
 
 
 def register(app: Quart) -> None:
@@ -33,6 +39,7 @@ def register(app: Quart) -> None:
         if error:
             body = await _render(None, error)
             return body, 400
+        live.publish()
         return redirect(url_for("admin"), code=303)
 
 
@@ -52,6 +59,7 @@ async def _render(issued: Optional[tuple[str, str]], error: str = "") -> str:
         badge_rows = [_badge(row) for row in await badges.list_badges(connection)]
         open_badges = [_badge(row) for row in await badges.list_open(connection)]
         pinned = [_award_row(row) for row in await awards.list_awards(connection)]
+        event_rows = await events.list_events(connection)
     finally:
         await connection.close()
     issued_alias = ""
@@ -66,6 +74,7 @@ async def _render(issued: Optional[tuple[str, str]], error: str = "") -> str:
         badges=badge_rows,
         open_badges=open_badges,
         pinned=pinned,
+        events=event_rows,
         issued_alias=issued_alias,
         issued_key=issued_key,
     )
@@ -91,6 +100,12 @@ async def _dispatch(connection, form, admin_id: int) -> Optional[str]:
         return await _pin(connection, form, admin_id)
     if action == "unpin":
         return await _unpin(connection, form)
+    if action == "set_station":
+        return await _set_station(connection, form)
+    if action == "set_weight":
+        return await _set_weight(connection, form)
+    if action == "add_event":
+        return await _add_event(connection, form, admin_id)
     return "Unknown action."
 
 
@@ -152,13 +167,17 @@ async def _delete_crew(connection, form, admin_id: int) -> Optional[str]:
 
 
 async def _add_badge(connection, form) -> Optional[str]:
+    raw_weight = str(form.get("weight", "1"))
+    if not raw_weight.isdigit():
+        return "Weight must be from 1 to 10."
     try:
         await badges.create(
             connection,
             str(form.get("title", "")),
             str(form.get("polarity", "")),
+            weight=int(raw_weight),
         )
-    except (BadgeTitleError, BadgePolarityError) as error:
+    except (BadgeTitleError, BadgePolarityError, BadgeWeightError) as error:
         return str(error)
     return None
 
@@ -206,6 +225,47 @@ async def _unpin(connection, form) -> Optional[str]:
     return None
 
 
+async def _set_station(connection, form) -> Optional[str]:
+    crew_id = _number(form, "crew_id")
+    if crew_id is None:
+        return "Choose an alias."
+    raw = str(form.get("station", ""))
+    station = raw if raw in {"mess", "drill"} else None
+    if raw not in {"", "mess", "drill"}:
+        return "Station must be mess, drill, or empty."
+    try:
+        await crew.set_station(connection, crew_id, station)
+    except (CrewNotFound, CrewStatusError) as error:
+        return str(error)
+    return None
+
+
+async def _set_weight(connection, form) -> Optional[str]:
+    badge_id = _number(form, "badge_id")
+    raw = str(form.get("weight", ""))
+    if badge_id is None or not raw.isdigit():
+        return "Choose a badge and a weight."
+    try:
+        await badges.set_weight(connection, badge_id, int(raw))
+    except (BadgeNotFound, BadgeWeightError) as error:
+        return str(error)
+    return None
+
+
+async def _add_event(connection, form, admin_id: int) -> Optional[str]:
+    try:
+        await events.create_event(
+            connection,
+            str(form.get("title", "")),
+            str(form.get("opens_at", "")),
+            str(form.get("closes_at", "")),
+            admin_id,
+        )
+    except EventError as error:
+        return str(error)
+    return None
+
+
 async def _admin_count(connection) -> int:
     async with connection.execute(
         "SELECT COUNT(*) AS n FROM crew WHERE role = 'admin'"
@@ -220,6 +280,7 @@ def _person(row) -> dict:
         "alias": str(row["alias"]),
         "status": str(row["status"]),
         "role": str(row["role"]),
+        "station": row["station"] or "",
         "has_key": row["key_hash"] is not None,
     }
 
@@ -229,6 +290,7 @@ def _badge(row) -> dict:
         "id": int(row["id"]),
         "title": str(row["title"]),
         "polarity": str(row["polarity"]),
+        "weight": int(row["weight"]),
         "closed": row["closed_at"] is not None,
     }
 

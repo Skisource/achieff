@@ -1,6 +1,6 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 9 ship delivery is in place.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 10 v1 is in place.
 
 ## Delivery
 
@@ -41,6 +41,16 @@ docker build --target test .
 ```
 
 ## Unreleased
+
+### 2026-10-12 — Phase 10 v1
+
+Events, own-key rotation, live boards, station bias, and badge weights. Awards still go through admin.
+
+- An admin opens a time-boxed event. A signed-in alias can take part. Joining does not pin a badge. Event times are stored as UTC `YYYY-MM-DDTHH:MM:SS+00:00`.
+- `/me` lists that alias's awards and can issue a new key. The old key stops working. The session stays. The new key is shown once.
+- `/live` tells open boards to fetch again when an admin change lands. The 15 second poll is gone.
+- Admin can set a station of mess or drill floor. The ship walks that alias toward the mess or the drill floor. Empty means wander.
+- A badge weight is 1 to 10, default 1. Merit and infamy sum the weights.
 
 ### 2026-10-12 — Phase 9 ship delivery
 
@@ -384,15 +394,19 @@ Non-root container user, volume for SQLite, documented backup (copy the db file)
 
 **Done when:** a second machine can `docker compose up` and an admin can run the boards from a browser on the ship network.
 
-### Phase 10 — Later, not v1
+### Phase 10 — Events, account, live boards, station, weights
 
-Held here so the earlier phases leave seams for them.
+The first cut of the later list. Peer voting that writes the leaderboard stays out.
 
-- **Events.** Admin opens a time-boxed event ("bake-off", "rounds"). Signed-in aliases take part. The award step still goes through admin in the first event version, so a joke cannot write the leaderboard unattended.
+- **Events.** Admin opens a time-boxed event ("bake-off", "rounds"). Signed-in aliases take part. The award step still goes through admin, so a joke cannot write the leaderboard unattended.
 - **Account management.** Signed-in crew rotate their own key (old key dies, new key shown once). Award history for "me". Still no email and no extra profile fields.
-- **Live boards.** Replace the 15s poll with a websocket when two screens must move together.
+- **Live boards.** A websocket replaces the 15s poll so two screens move together after an admin change.
 - **Where on the ship.** Optional waypoint bias (mess vs drill floor) chosen by admin, still not a real cabin number.
 - **Badge weights.** A badge can be worth more than 1 if the mess decides a cable strike outranks buying one round.
+
+**Status:** done.
+
+**Done when:** joining an event does not create an award, a rotated key kills the old one, and a weighted badge changes the career score.
 
 ## 9. Out of scope for the whole v1 arc
 

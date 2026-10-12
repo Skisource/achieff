@@ -51,21 +51,35 @@ async def list_open(connection: Connection) -> list:
         return await cursor.fetchall()
 
 
-async def create(connection: Connection, title: str, polarity: str) -> int:
+async def create(
+    connection: Connection,
+    title: str,
+    polarity: str,
+    *,
+    weight: int = 1,
+) -> int:
     cleaned = clean_title(title)
     if polarity not in _POLARITIES:
         raise BadgePolarityError("Polarity must be goody or baddy.")
     slug = slug_for(cleaned)
     if not slug:
         raise BadgeTitleError("Title needs a letter or number.")
+    checked = checked_weight(weight)
     sort_order = await _next_sort_order(connection)
     try:
         cursor = await connection.execute(
             """
-            INSERT INTO badge (slug, title, polarity, sort_order, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO badge (slug, title, polarity, sort_order, weight, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (slug, cleaned, polarity, sort_order, datetime.now(UTC).isoformat()),
+            (
+                slug,
+                cleaned,
+                polarity,
+                sort_order,
+                checked,
+                datetime.now(UTC).isoformat(),
+            ),
         )
         await connection.commit()
     except IntegrityError as error:
@@ -85,6 +99,16 @@ async def rename(connection: Connection, badge_id: int, title: str) -> None:
     await connection.commit()
 
 
+async def set_weight(connection: Connection, badge_id: int, weight: int) -> None:
+    if await get(connection, badge_id) is None:
+        raise BadgeNotFound("That badge does not exist.")
+    await connection.execute(
+        "UPDATE badge SET weight = ? WHERE id = ?",
+        (checked_weight(weight), badge_id),
+    )
+    await connection.commit()
+
+
 async def close(connection: Connection, badge_id: int) -> None:
     if await get(connection, badge_id) is None:
         raise BadgeNotFound("That badge does not exist.")
@@ -97,6 +121,12 @@ async def close(connection: Connection, badge_id: int) -> None:
         (datetime.now(UTC).isoformat(), badge_id),
     )
     await connection.commit()
+
+
+def checked_weight(weight: int) -> int:
+    if weight < 1 or weight > 10:
+        raise BadgeWeightError("Weight must be from 1 to 10.")
+    return weight
 
 
 def clean_title(title: str) -> str:
@@ -132,6 +162,10 @@ class BadgePolarityError(ValueError):
 
 
 class BadgeNotFound(LookupError):
+    pass
+
+
+class BadgeWeightError(ValueError):
     pass
 
 

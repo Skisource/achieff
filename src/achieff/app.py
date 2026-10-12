@@ -3,7 +3,19 @@ from pathlib import Path
 
 from quart import Quart, Response, abort, jsonify, request
 
-from achieff import admin, art, auth, db, leaderboard, onboard, pages, retired
+from achieff import (
+    account,
+    admin,
+    art,
+    auth,
+    db,
+    events,
+    leaderboard,
+    live,
+    onboard,
+    pages,
+    retired,
+)
 
 MAX_BODY_BYTES = 64 * 1024
 
@@ -26,6 +38,9 @@ def create_app() -> Quart:
     onboard.register(app)
     retired.register(app)
     leaderboard.register(app)
+    events.register(app)
+    account.register(app)
+    live.register(app)
 
     @app.get("/health")
     async def health() -> Response:

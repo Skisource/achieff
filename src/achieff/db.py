@@ -7,7 +7,7 @@ from aiosqlite import Connection
 from achieff import badges, gdpr
 
 DATABASE_NAME = "achieff.sqlite3"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 _MIGRATION_1 = """
 CREATE TABLE IF NOT EXISTS schema_version (
@@ -60,7 +60,26 @@ ALTER TABLE badge ADD COLUMN closed_at TEXT;
 UPDATE schema_version SET version = 2;
 """
 
-MIGRATIONS = (_MIGRATION_1, _MIGRATION_2)
+_MIGRATION_3 = """
+ALTER TABLE badge ADD COLUMN weight INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE crew ADD COLUMN station TEXT;
+CREATE TABLE event (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    opens_at TEXT NOT NULL,
+    closes_at TEXT NOT NULL,
+    created_by INTEGER REFERENCES crew(id) ON DELETE SET NULL
+);
+CREATE TABLE participation (
+    event_id INTEGER NOT NULL REFERENCES event(id) ON DELETE CASCADE,
+    crew_id INTEGER NOT NULL REFERENCES crew(id) ON DELETE CASCADE,
+    joined_at TEXT NOT NULL,
+    PRIMARY KEY (event_id, crew_id)
+);
+UPDATE schema_version SET version = 3;
+"""
+
+MIGRATIONS = (_MIGRATION_1, _MIGRATION_2, _MIGRATION_3)
 
 
 def data_dir() -> Path:

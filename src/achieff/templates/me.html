@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Me · Achieff{% endblock %}
+{% block content %}
+  <h1 class="title">Me</h1>
+  {% if issued_key %}
+    <article class="message is-warning">
+      <div class="message-header"><p>New key</p></div>
+      <div class="message-body">
+        <p>Copy this key now. The previous key no longer works.</p>
+        <p><code>{{ issued_key }}</code></p>
+      </div>
+    </article>
+  {% endif %}
+  <section class="box">
+    <h2 class="title is-4">Awards</h2>
+    {% if history %}
+      <ul>
+        {% for award in history %}
+          <li>{{ award.title }} ({{ award.polarity }})</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No badges yet.</p>
+    {% endif %}
+  </section>
+  <section class="box">
+    <h2 class="title is-4">Key</h2>
+    <form method="post" action="{{ url_for('me_key') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="button is-link" type="submit">Issue a new key</button>
+    </form>
+  </section>
+{% endblock %}

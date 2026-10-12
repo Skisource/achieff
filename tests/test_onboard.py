@@ -65,6 +65,7 @@ async def test_retired_alias_leaves_the_ship(application: Quart, connection) -> 
         {
             "alias": "Walker",
             "sprite_variant": int(walker["sprite_variant"]),
+            "station": "",
             "merit": 1,
             "infamy": 0,
         }

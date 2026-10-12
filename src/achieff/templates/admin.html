@@ -53,6 +53,7 @@
           <tr>
             <th>Alias</th>
             <th>Status</th>
+            <th>Station</th>
             <th>Role</th>
             <th>Key</th>
             <th></th>
@@ -73,6 +74,27 @@
                         <select name="status" aria-label="Status for {{ person.alias }}">
                           <option value="active" {% if person.status == "active" %}selected{% endif %}>Active</option>
                           <option value="retired" {% if person.status == "retired" %}selected{% endif %}>Retired</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="control">
+                      <button class="button is-small" type="submit">Save</button>
+                    </div>
+                  </div>
+                </form>
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('admin_submit') }}">
+                  <input type="hidden" name="csrf" value="{{ csrf }}">
+                  <input type="hidden" name="action" value="set_station">
+                  <input type="hidden" name="crew_id" value="{{ person.id }}">
+                  <div class="field has-addons">
+                    <div class="control">
+                      <div class="select is-small">
+                        <select name="station" aria-label="Station for {{ person.alias }}">
+                          <option value="" {% if not person.station %}selected{% endif %}>Anywhere</option>
+                          <option value="mess" {% if person.station == "mess" %}selected{% endif %}>Mess</option>
+                          <option value="drill" {% if person.station == "drill" %}selected{% endif %}>Drill floor</option>
                         </select>
                       </div>
                     </div>
@@ -118,6 +140,10 @@
           <input class="input" id="badge-title" name="title" required>
         </div>
         <div class="control">
+          <label class="label" for="badge-weight">Weight</label>
+          <input class="input" id="badge-weight" name="weight" type="number" min="1" max="10" value="1" required>
+        </div>
+        <div class="control">
           <label class="label" for="badge-polarity">Polarity</label>
           <div class="select">
             <select id="badge-polarity" name="polarity">
@@ -144,8 +170,19 @@
           <button class="button" type="submit">Rename</button>
         </div>
       </form>
+      <form method="post" action="{{ url_for('admin_submit') }}" class="field is-grouped">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="action" value="set_weight">
+        <input type="hidden" name="badge_id" value="{{ badge.id }}">
+        <div class="control">
+          <input class="input" name="weight" type="number" min="1" max="10" value="{{ badge.weight }}" aria-label="Weight for {{ badge.title }}" required>
+        </div>
+        <div class="control">
+          <button class="button" type="submit">Set weight</button>
+        </div>
+      </form>
       <p class="mb-4">
-        {{ badge.polarity }}
+        {{ badge.polarity }} · weight {{ badge.weight }}
         {% if badge.closed %}
           · closed to new pins
         {% else %}
@@ -210,5 +247,37 @@
     {% else %}
       <p>No badges pinned yet.</p>
     {% endif %}
+  </section>
+
+  <section class="box">
+    <h2 class="title is-4">Events</h2>
+    <form method="post" action="{{ url_for('admin_submit') }}" class="mb-5">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="action" value="add_event">
+      <div class="field">
+        <label class="label" for="event-title">Title</label>
+        <input class="input" id="event-title" name="title" required>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <label class="label" for="event-opens">Opens</label>
+          <input class="input" id="event-opens" name="opens_at" type="datetime-local" required>
+        </div>
+        <div class="control">
+          <label class="label" for="event-closes">Closes</label>
+          <input class="input" id="event-closes" name="closes_at" type="datetime-local" required>
+        </div>
+      </div>
+      <button class="button is-link" type="submit">Open event</button>
+    </form>
+    {% for event in events %}
+      <article class="mb-4">
+        <p class="has-text-weight-semibold">{{ event.title }}</p>
+        <p>{{ event.opens_at }} to {{ event.closes_at }}</p>
+        {% if event.participants %}
+          <p>Taking part: {{ event.participants | join(", ") }}</p>
+        {% endif %}
+      </article>
+    {% endfor %}
   </section>
 {% endblock %}

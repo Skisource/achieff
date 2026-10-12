@@ -28,8 +28,25 @@ async def active_crew(connection: Connection) -> list[dict[str, object]]:
         SELECT
             c.alias AS alias,
             c.sprite_variant AS sprite_variant,
-            COALESCE(SUM(CASE WHEN b.polarity = 'goody' THEN 1 ELSE 0 END), 0) AS merit,
-            COALESCE(SUM(CASE WHEN b.polarity = 'baddy' THEN 1 ELSE 0 END), 0) AS infamy
+            c.station AS station,
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN b.polarity = 'goody' THEN COALESCE(b.weight, 1)
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS merit,
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN b.polarity = 'baddy' THEN COALESCE(b.weight, 1)
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS infamy
         FROM crew c
         LEFT JOIN award a ON a.crew_id = c.id
         LEFT JOIN badge b ON b.id = a.badge_id
@@ -43,6 +60,7 @@ async def active_crew(connection: Connection) -> list[dict[str, object]]:
         {
             "alias": str(row["alias"]),
             "sprite_variant": int(row["sprite_variant"]),
+            "station": row["station"] or "",
             "merit": int(row["merit"]),
             "infamy": int(row["infamy"]),
         }

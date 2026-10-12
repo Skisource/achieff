@@ -34,6 +34,18 @@
               {% if page and item.key == page.key %}aria-current="page"{% endif %}
             >{{ item.label }}</a>
           {% endfor %}
+          <a
+            class="navbar-item{% if page and page.key == 'events' %} is-active{% endif %}"
+            href="{{ url_for('events_page') }}"
+            {% if page and page.key == 'events' %}aria-current="page"{% endif %}
+          >Events</a>
+          {% if viewer %}
+            <a
+              class="navbar-item{% if page and page.key == 'me' %} is-active{% endif %}"
+              href="{{ url_for('me') }}"
+              {% if page and page.key == 'me' %}aria-current="page"{% endif %}
+            >Me</a>
+          {% endif %}
         </div>
         {% if viewer %}
           <div class="navbar-end">

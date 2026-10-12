@@ -134,6 +134,20 @@ async def any_admin(connection: Connection) -> bool:
         return await cursor.fetchone() is not None
 
 
+async def set_station(
+    connection: Connection, crew_id: int, station: Optional[str]
+) -> None:
+    if station not in {None, "mess", "drill"}:
+        raise CrewStatusError("Station must be mess, drill, or empty.")
+    if await get(connection, crew_id) is None:
+        raise CrewNotFound("That alias does not exist.")
+    await connection.execute(
+        "UPDATE crew SET station = ? WHERE id = ?",
+        (station, crew_id),
+    )
+    await connection.commit()
+
+
 async def set_key_hash(connection: Connection, crew_id: int, key_hash: str) -> None:
     if await get(connection, crew_id) is None:
         raise CrewNotFound("That alias does not exist.")

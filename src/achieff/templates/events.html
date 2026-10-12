@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Events · Achieff{% endblock %}
+{% block content %}
+  <h1 class="title">Events</h1>
+  {% if error %}
+    <article class="message is-danger">
+      <div class="message-body">{{ error }}</div>
+    </article>
+  {% endif %}
+  {% if not viewer %}
+    <p class="mb-4">Sign in to take part. Badges are still awarded by an admin.</p>
+  {% endif %}
+  {% if events %}
+    {% for event in events %}
+      <article class="box">
+        <h2 class="title is-5">{{ event.title }}</h2>
+        <p>{{ event.opens_at }} to {{ event.closes_at }}</p>
+        {% if event.participants %}
+          <p>Taking part: {{ event.participants | join(", ") }}</p>
+        {% else %}
+          <p>Nobody has joined yet.</p>
+        {% endif %}
+        {% if viewer %}
+          <form method="post" action="{{ url_for('events_join') }}">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <input type="hidden" name="event_id" value="{{ event.id }}">
+            <button class="button is-link" type="submit">Take part</button>
+          </form>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <p>No events are open.</p>
+  {% endif %}
+{% endblock %}

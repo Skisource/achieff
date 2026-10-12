@@ -74,8 +74,24 @@ SELECT
     c.alias AS alias,
     c.status AS status,
     c.sprite_variant AS sprite_variant,
-    COALESCE(SUM(CASE WHEN b.polarity = 'goody' THEN 1 ELSE 0 END), 0) AS merit,
-    COALESCE(SUM(CASE WHEN b.polarity = 'baddy' THEN 1 ELSE 0 END), 0) AS infamy,
+    COALESCE(
+        SUM(
+            CASE
+                WHEN b.polarity = 'goody' THEN COALESCE(b.weight, 1)
+                ELSE 0
+            END
+        ),
+        0
+    ) AS merit,
+    COALESCE(
+        SUM(
+            CASE
+                WHEN b.polarity = 'baddy' THEN COALESCE(b.weight, 1)
+                ELSE 0
+            END
+        ),
+        0
+    ) AS infamy,
     MIN(a.awarded_at) AS first_award_at
 FROM crew c
 LEFT JOIN award a ON a.crew_id = c.id
