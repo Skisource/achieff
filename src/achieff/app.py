@@ -1,9 +1,11 @@
 import asyncio
 from pathlib import Path
 
-from quart import Quart, Response, jsonify
+from quart import Quart, Response, abort, jsonify, request
 
 from achieff import admin, art, auth, db, leaderboard, onboard, pages, retired
+
+MAX_BODY_BYTES = 64 * 1024
 
 
 def create_app() -> Quart:
@@ -14,6 +16,8 @@ def create_app() -> Quart:
         static_folder=str(root / "static"),
     )
     app.config["SECRET_KEY"] = auth.secret_key()
+    app.config["MAX_CONTENT_LENGTH"] = MAX_BODY_BYTES
+    app.before_request(_reject_large_body)
     asyncio.run(_startup())
     pages.register(app)
     auth.register(app)
@@ -28,6 +32,11 @@ def create_app() -> Quart:
         return jsonify(status="ok")
 
     return app
+
+
+async def _reject_large_body() -> None:
+    if request.content_length is not None and request.content_length > MAX_BODY_BYTES:
+        abort(413)
 
 
 async def _startup() -> None:

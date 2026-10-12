@@ -6,7 +6,7 @@ from achieff.retired import icon_index
 
 
 def register(app: Quart) -> None:
-    @app.get("/leaderboard")
+    @app.get("/leaderboard", endpoint="leaderboard")
     async def leaderboard_page() -> str:
         return await render_template("leaderboard.html", page=_page())
 
@@ -40,10 +40,16 @@ async def standings(connection: Connection) -> dict[str, object]:
     }
 
 
-async def _badges_by_alias(connection: Connection) -> dict[str, list[dict[str, object]]]:
+async def _badges_by_alias(
+    connection: Connection,
+) -> dict[str, list[dict[str, object]]]:
     async with connection.execute(
         """
-        SELECT c.alias AS alias, b.slug AS slug, b.title AS title, b.polarity AS polarity
+        SELECT
+            c.alias AS alias,
+            b.slug AS slug,
+            b.title AS title,
+            b.polarity AS polarity
         FROM award
         JOIN crew c ON c.id = award.crew_id
         JOIN badge b ON b.id = award.badge_id
@@ -64,7 +70,9 @@ async def _badges_by_alias(connection: Connection) -> dict[str, list[dict[str, o
     return grouped
 
 
-def _row(rank: int, standing: scoring.Standing, badges: list[dict[str, object]]) -> dict:
+def _row(
+    rank: int, standing: scoring.Standing, badges: list[dict[str, object]]
+) -> dict:
     return {
         "rank": rank,
         "alias": standing.alias,

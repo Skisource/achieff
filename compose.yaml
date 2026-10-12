@@ -4,11 +4,13 @@ services:
   achieff:
     build:
       context: .
+      target: runtime
     image: achieff:local
     ports:
       - "10000:8080"
     environment:
       ACHIEFF_DATA_DIR: /data
+      ACHIEFF_ENV: ${ACHIEFF_ENV:-production}
       ACHIEFF_SECRET_KEY: ${ACHIEFF_SECRET_KEY:-dev-only-change-me}
       ACHIEFF_BOOTSTRAP_ALIAS: ${ACHIEFF_BOOTSTRAP_ALIAS:-}
     volumes:

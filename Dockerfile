@@ -1,4 +1,4 @@
-FROM python:3.14.8-slim
+FROM python:3.14.8-slim AS base
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.23 /uv /uvx /bin/
 
@@ -15,7 +15,8 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH" \
-    ACHIEFF_DATA_DIR=/data
+    ACHIEFF_DATA_DIR=/data \
+    PYTHONPATH=/app/src
 
 RUN uv venv /app/.venv
 
@@ -23,10 +24,20 @@ COPY requirements.txt ./
 RUN uv pip install --no-cache -r requirements.txt
 
 COPY src ./src
+
+FROM base AS test
+
+COPY requirements-development.txt pytest.ini ruff.toml ./
+COPY tests ./tests
+RUN uv pip install --no-cache -r requirements-development.txt \
+    && ruff format --check src tests \
+    && ruff check src tests \
+    && pytest
+
+FROM base AS runtime
+
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod 755 /entrypoint.sh
-
-ENV PYTHONPATH=/app/src
 
 EXPOSE 8080
 

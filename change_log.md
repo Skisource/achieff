@@ -1,8 +1,54 @@
 # Achieff change log
 
-Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 8 leaderboard is in place. Ship delivery has not started.
+Living plan and change record for the crew achievement board. Newest entries go at the top. Phase 9 ship delivery is in place.
+
+## Delivery
+
+The app listens on container port 8080. Compose publishes host port 10000. The process runs as uid 10001. SQLite is `/data/achieff.sqlite3` on the `achieff-data` volume. Set `ACHIEFF_ENV=production` on the ship so `/dev/art` stays closed.
+
+```
+cp .env.example .env
+```
+
+Put a real `ACHIEFF_SECRET_KEY` in `.env`, and set `ACHIEFF_BOOTSTRAP_ALIAS` to the first admin's alias.
+
+```
+docker compose up --build -d
+docker compose logs
+```
+
+The first boot with an empty database prints one line, `Achieff bootstrap admin alias=... key=...`. Open `http://<ship-host>:10000/admin` and sign in with that alias and key. The boards are `/`, `/retired`, and `/leaderboard`.
+
+Backup, while the container is running:
+
+```
+docker compose cp achieff:/data/achieff.sqlite3 ./achieff-backup.sqlite3
+```
+
+Restore, with the container stopped so SQLite is not mid-write:
+
+```
+docker compose stop achieff
+docker compose cp ./achieff-backup.sqlite3 achieff:/data/achieff.sqlite3
+docker compose run --rm --user root --entrypoint chown achieff app:app /data/achieff.sqlite3
+docker compose start achieff
+```
+
+Request bodies larger than 64 KiB are rejected. Check formatting, lint, and tests inside the image:
+
+```
+docker build --target test .
+```
 
 ## Unreleased
+
+### 2026-10-12 — Phase 9 ship delivery
+
+A second machine can `docker compose up` and an admin can open the boards on the ship network. The runbook is in the Delivery section above.
+
+- The container still runs as uid 10001, with SQLite on the `/data` volume. Compose sets `ACHIEFF_ENV`, `ACHIEFF_SECRET_KEY`, and `ACHIEFF_BOOTSTRAP_ALIAS`.
+- Request bodies over 64 KiB are rejected with 413.
+- `docker build --target test` runs ruff and pytest in the image. The runtime image does not include the test tools.
 
 ### 2026-10-12 — Phase 8 leaderboard
 
@@ -333,6 +379,8 @@ Callouts, ranked table, mugshots, badge icons, empty state. Sorting matches sect
 ### Phase 9 — Ship delivery
 
 Non-root container user, volume for SQLite, documented backup (copy the db file), bootstrap env vars in `compose.yaml`, request size limits, a short runbook at the top of this log's delivery section once the commands are real. `ruff format` and `ruff check` clean. Pytest green inside the image.
+
+**Status:** done.
 
 **Done when:** a second machine can `docker compose up` and an admin can run the boards from a browser on the ship network.
 

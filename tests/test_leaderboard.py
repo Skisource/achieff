@@ -3,7 +3,9 @@ from quart import Quart
 from achieff import awards, badges, crew
 
 
-async def test_callouts_match_the_ends_of_the_table(application: Quart, connection) -> None:
+async def test_callouts_match_the_ends_of_the_table(
+    application: Quart, connection
+) -> None:
     client = application.test_client()
     saint = await crew.add(connection, "Saint", status="retired")
     ann = await crew.add(connection, "Ann")
@@ -12,12 +14,24 @@ async def test_callouts_match_the_ends_of_the_table(application: Quart, connecti
     await crew.add(connection, "Quiet")
     cake = await badges.find_by_slug(connection, "baked-the-best-cake")
     cable = await badges.find_by_slug(connection, "drilled-through-cable")
-    await awards.pin(connection, saint, int(cake["id"]), awarded_at="2026-01-01T00:00:00+00:00")
-    await awards.pin(connection, ann, int(cake["id"]), awarded_at="2026-02-01T00:00:00+00:00")
-    await awards.pin(connection, ann, int(cable["id"]), awarded_at="2026-02-02T00:00:00+00:00")
-    await awards.pin(connection, bea, int(cake["id"]), awarded_at="2026-03-01T00:00:00+00:00")
-    await awards.pin(connection, bea, int(cable["id"]), awarded_at="2026-03-02T00:00:00+00:00")
-    await awards.pin(connection, menace, int(cable["id"]), awarded_at="2026-04-01T00:00:00+00:00")
+    await awards.pin(
+        connection, saint, int(cake["id"]), awarded_at="2026-01-01T00:00:00+00:00"
+    )
+    await awards.pin(
+        connection, ann, int(cake["id"]), awarded_at="2026-02-01T00:00:00+00:00"
+    )
+    await awards.pin(
+        connection, ann, int(cable["id"]), awarded_at="2026-02-02T00:00:00+00:00"
+    )
+    await awards.pin(
+        connection, bea, int(cake["id"]), awarded_at="2026-03-01T00:00:00+00:00"
+    )
+    await awards.pin(
+        connection, bea, int(cable["id"]), awarded_at="2026-03-02T00:00:00+00:00"
+    )
+    await awards.pin(
+        connection, menace, int(cable["id"]), awarded_at="2026-04-01T00:00:00+00:00"
+    )
 
     page = await client.get("/leaderboard")
     body = await page.get_data(as_text=True)
